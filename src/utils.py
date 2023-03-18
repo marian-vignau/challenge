@@ -1,7 +1,7 @@
 """
 Functions used to make some time calc.
 """
-from datetime import time, datetime
+from datetime import datetime, time
 
 
 def read_hour(hour_str: str, end_of_minute=False) -> time:

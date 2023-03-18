@@ -2,16 +2,22 @@
 Some test cases.
 Using standard library
 """
-import unittest
+import argparse
+import pathlib
 import sys
+import tempfile
+import unittest
+from unittest import mock
+
+from src.main import main
 from src.parse_txt import *
-from src.utils import *
 from src.rates import Rates
+from src.utils import *
 
 
 class TestPayment(unittest.TestCase):
     def setUp(self):
-        self.rates = Rates()
+        self.rates = Rates("tests/test_rates.ini")
 
     def test_validation_errors(self):
         emp = "TU10:00-12:00,TH01:00-03:00"
@@ -73,6 +79,54 @@ class TestPayment(unittest.TestCase):
         self.rates.apply_rates(employee)
         payed = [p["minutes"] for p in employee.subtotals]
         self.assertEqual(sum(worked), sum(payed))
+
+
+class TestCommandLineInterface(unittest.TestCase):
+    def setUp(self):
+        self.input_file = "tests/employees.txt"
+        self.rates_file = "tests/test_rates.ini"
+
+        # Create a temporary file to use as output
+        self.output_file = tempfile.NamedTemporaryFile(delete=False)
+        pathlib.Path(self.output_file.name).unlink()
+
+        # Create a temporary log file
+        self.log_file = tempfile.NamedTemporaryFile(delete=False)
+        self.log_filename = self.log_file.name
+        self.log_file.close()
+
+    def tearDown(self):
+        # Delete the temporary files
+        pathlib.Path(self.log_filename).unlink()
+        pathlib.Path(self.output_file.name).unlink()
+
+    def test_command_line_interface(self):
+        """Test command line mocking argparse."""
+        return_value = argparse.Namespace(
+            filename=self.input_file,
+            output=self.output_file.name,
+            debug=True,
+            rates=self.rates_file,
+            log=self.log_filename,
+        )
+        with mock.patch(
+            "argparse.ArgumentParser.parse_args", return_value=return_value
+        ):
+            main()  # Read the output file and check its contents
+        with open(self.output_file.name, "r") as f:
+            output_text = f.read()
+            self.assertTrue("RENE: 215.00 usd" in output_text)
+            self.assertTrue("ASTRID: 85.00 usd" in output_text)
+
+        # Read the log file and check its contents
+        with open(self.log_filename, "r") as f:
+            log_text = f.read()
+            self.assertTrue("RENE: 215.00 usd" in log_text)
+            self.assertTrue("ASTRID: 85.00 usd" in log_text)
+            self.assertTrue("Error in MO21:00-13:00" in log_text)
+            self.assertTrue("Error in line 4" in log_text)
+
+            print(log_text)
 
 
 if __name__ == "__main__":

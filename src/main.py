@@ -6,11 +6,10 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
+from src.parse_txt import ValidationError, parse_employee
 from src.rates import Rates
-from src.parse_txt import parse_employee, ValidationError
 
 log_name = "employee_data_errors.log"
-logging.basicConfig(filename=log_name, level=logging.ERROR)
 
 
 def parse_args():
@@ -37,20 +36,28 @@ def parse_args():
         default="data/rates.ini",
         help="Reads the rates from a file.",
     )
+    parser.add_argument(
+        "-l",
+        "--log",
+        action="store",
+        default=log_name,
+        help="file to log errors and debug information",
+    )
 
     args = parser.parse_args()
     if not args.filename:
-        raise ValueError("Provide a file path with the necessary data.")
-    if not Path(args.filename).exists:
-        raise ValueError(
+        raise FileNotFoundError("Provide a file path with the necessary data.")
+    if not Path(args.filename).exists():
+        raise FileNotFoundError(
             f"{args.filename} doesn't exists. Provide a file path with the necessary data."
         )
-    if not Path(args.rates).exists:
-        raise ValueError(
+    if not Path(args.rates).exists():
+        raise FileNotFoundError(
             f"{args.rates} doesn't exists. Provide a file path with the rates information."
         )
-    if args.output and Path(args.output).exists:
-        raise ValueError(f"{args.ouput} exists. Please use another file name.")
+    if args.output and Path(args.output).exists():
+        output = str(Path(args.output).absolute().resolve())
+        raise FileExistsError(f"{output} exists. Please use another file name.")
 
     return args
 
@@ -77,8 +84,10 @@ def output(file, employee):
 def main():
     args = parse_args()
     rates = Rates(args.rates)
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
+    logging.basicConfig(
+        filename=args.log, level=logging.DEBUG if args.debug else logging.ERROR
+    )
+
     with open(args.filename) as fh:
         if args.output:
             f_out = open(args.output, "w")

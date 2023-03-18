@@ -3,8 +3,8 @@ Parse and compute payment for every employee line.
 """
 from decimal import Decimal
 
-from src.utils import read_hour, diff_minutes
 from src.employee import Employee
+from src.utils import diff_minutes, read_hour
 
 
 class ValidationError(Exception):
