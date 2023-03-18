@@ -29,4 +29,3 @@ def diff_minutes(segment: dict) -> int:
     time_point = lambda key: datetime.combine(datetime.now(), segment[key])
     delta = time_point("end") - time_point("start")
     return round(delta.seconds / 60)
-
