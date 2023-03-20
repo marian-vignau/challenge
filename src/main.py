@@ -13,6 +13,7 @@ log_name = "employee_data_errors.log"
 
 
 def parse_args():
+    """Parse and validate command line arguments."""
     parser = ArgumentParser(
         prog="IOET Challenge", description="Compute workers payment"
     )
@@ -63,6 +64,8 @@ def parse_args():
 
 
 def input(file, rates):
+    """Read and process employees text file."""
+
     for n_line, line in enumerate(file.readlines()):
         line = line.strip()
         if not line:
@@ -74,11 +77,6 @@ def input(file, rates):
             logging.error("Error in line %d %s", n_line, error.args[0])
         else:
             yield employee
-
-
-def output(file, employee):
-    file.write(str(employee) + "\n")
-    logging.debug(employee.debug())
 
 
 def main():
@@ -93,6 +91,7 @@ def main():
             f_out = open(args.output, "w")
         else:
             f_out = sys.stdout
-        for data in input(fh, rates):
-            output(f_out, data)
+        for employee in input(fh, rates):
+            f_out.write(str(employee) + "\n")
+            logging.debug(employee.debug())
         f_out.close()

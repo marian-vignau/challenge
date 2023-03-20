@@ -10,6 +10,8 @@ from src.utils import diff_minutes, read_hour
 
 
 class Rates:
+    """Read and apply the payment rates."""
+
     def __init__(self, filename="data/rates.ini"):
         """Reads the configuration file that include all the prices."""
         parser = configparser.ConfigParser()

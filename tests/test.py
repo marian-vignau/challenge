@@ -17,9 +17,11 @@ from src.utils import *
 
 class TestPayment(unittest.TestCase):
     def setUp(self):
+        """Read rates from the test rates files."""
         self.rates = Rates("tests/test_rates.ini")
 
     def test_validation_errors(self):
+        """Test errors  for malformed data."""
         emp = "TU10:00-12:00,TH01:00-03:00"
         with self.assertRaises(ValidationError) as error:
             parse_employee(emp)
@@ -60,6 +62,7 @@ class TestPayment(unittest.TestCase):
         )
 
     def test_basic_examples(self):
+        """Test some given data."""
         emp = (
             "RENE=MO10:00-12:00,TU10:00-12:00,TH01:00-03:00,SA14:00-18:00,SU20:00-21:00"
         )
@@ -73,6 +76,7 @@ class TestPayment(unittest.TestCase):
         self.assertEqual(employee.total, 85)
 
     def test_continuity(self):
+        """Test that every minute worked is payed."""
         emp = "ANNA=MO10:00-12:00,TH12:10-14:00,SU16:00-00:00"
         employee = parse_employee(emp)
         worked = [diff_minutes(p) for p in employee.periods]

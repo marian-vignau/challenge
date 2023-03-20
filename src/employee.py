@@ -7,6 +7,8 @@ from decimal import Decimal
 
 @dataclass
 class Employee:
+    """Employee, worked and payed hours."""
+
     name: str
     periods: list = field(default_factory=list)
     subtotals: list = field(default_factory=list)
@@ -19,6 +21,7 @@ class Employee:
         return f"{self.name}: {self.total:.2f} usd"
 
     def debug(self):
+        """Create a detailed list of payed hours."""
         details = [str(self)]
         for st in self.subtotals:
             detail = f"{st['start']:%H:%M}-{st['end']:%H:%M} {st['subtotal']:.2f}"
